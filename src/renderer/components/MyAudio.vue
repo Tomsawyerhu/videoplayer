@@ -26,48 +26,53 @@ import {
   setSource,
   playMusic,
   pauseMusic,
-  getByteFrequencyData
+  getByteFrequencyData,
+  getDefaultPlayer,
+  isOn
 } from "../utils/audioPlayer";
 import vue from "../utils/bus";
-import { mapGetters, mapActions, mapMutations } from "vuex"
+import { mapGetters, mapActions, mapMutations } from "vuex";
 
 export default {
   name: "myAudio",
   components: {},
   data() {
     return {
-      src: "static/video/soldout.mp3",
-      isPlay: false
+      src: "F:/KuGou/流行音悦台 - 6人用阿卡贝拉串烧2018年欧美热曲!.mp3"
     };
   },
   beforeMount() {
     setSource(this.src);
   },
+  mounted() {
+    vue.$on("playvideo", function(path) {
+      console.log(path);
+      if (isOn()) {
+        pauseMusic()
+        this.isPlay = false
+      }
+      getDefaultPlayer()
+      this.src = path
+      setSource(this.src)
+      playMusic()
+      vue.$emit("startpaint", [])
+    });
+  },
 
   methods: {
-    ...mapActions([
-      'setLocalRepository'
-    ]),
-    onPlay() {
-      this.isPlay = true;
-    },
-    onPause() {
-      this.isPlay = false;
-    },
+    ...mapActions(["setLocalRepository"]),
     startPlayOrPause() {
-      return this.isPlay ? this.pause() : this.play();
+      return isOn() ? this.pause() : this.play();
     },
     pause() {
-      this.onPause();
-      pauseMusic();
+      pauseMusic()
       //触发canvas事件
-      this.stopDraw();
+      this.stopDraw()
     },
     play() {
-      this.onPlay();
-      playMusic();
+      playMusic()
       //触发canvas事件
-      this.startDraw();
+      this.startDraw()
     },
     startDraw() {
       vue.$emit("startpaint", []);
@@ -76,7 +81,7 @@ export default {
       vue.$emit("stoppaint", []);
     },
     setLocalRepo() {
-      this.setLocalRepository()
+      this.setLocalRepository();
     }
   }
 };

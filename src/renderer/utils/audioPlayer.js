@@ -14,6 +14,8 @@ analyser.fftSize = 2048
 let _source
 //是否第一次播放标志
 var _isBegin = false
+//标志是否在播放
+var _ison=false
 
 
 
@@ -32,29 +34,45 @@ export function setSource(src) {
         let dataTmp = data.buffer //arrayBuffer
         audioContext.decodeAudioData(dataTmp).then((decodeData) => {
             _source.buffer = decodeData
-           _source.connect(analyser)
+            _source.connect(analyser)
             analyser.connect(audioContext.destination)
         })
     })
 }
 
 export function playMusic() {
-    if(!_isBegin){
-        if(_source=== undefined){
+    if (!_isBegin) {
+        if (_source === undefined) {
             throw Error("音频未初始化")
         }
         _source.start()
-        _isBegin=true
+        _isBegin = true
+    } else {
+        audioContext.resume()
     }
-    else{audioContext.resume()}
+    _ison=true
 }
 
 export function pauseMusic() {
     audioContext.suspend()
+    _ison=false
 }
 
-export function getByteFrequencyData(){
+export function getByteFrequencyData() {
     var audioArray = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(audioArray)
     return audioArray
+}
+
+export function isOn(){
+    return _ison
+}
+
+export function getDefaultPlayer() {
+    audioContext = new AudioContext()
+    analyser = audioContext.createAnalyser()
+    analyser.fftSize = 2048
+    let _source
+    _isBegin = false
+    _ison=false
 }

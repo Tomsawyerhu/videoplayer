@@ -30,7 +30,6 @@ export default {
       for (var i = 0; i < 100; i++) {
         ctx.clearRect(3 * i, 0, 2, 400);
         let color = "#" + this.tenToSixteen(1000 * frequency[i]);
-        console.log(color);
         ctx.fillStyle = color;
         ctx.fillRect(3 * i, 0, 2, frequency[i] / 5);
         ctx.fillRect(3 * i, 100 - frequency[i] / 5, 2, frequency[i] / 5);

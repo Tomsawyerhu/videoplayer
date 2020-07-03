@@ -32,7 +32,9 @@ const main = {
                     extensions: ["*"]
                 }]
             }, function (result) {
-                //将新的仓库地址保存一下
+                console.log(result)
+                if(result!=undefined){
+                    //将新的仓库地址保存一下
                 let path = String(result).replace("\\\\", "/").replace(/\\/g, "/")
                 if (!path.endsWith("/")) {
                     path += '/'
@@ -40,6 +42,7 @@ const main = {
                 console.log(path)
                 store.set("localRepo", path)
                 dispatch('readLocalRepoAsArrays')
+                }
             })
 
         },
@@ -82,7 +85,11 @@ const main = {
                 //记录歌名，路径，时长信息
                 let info = {}
                 var m = arrays[x].split("/")
-                info.name = m[m.length - 1]
+                let name = m[m.length - 1]
+                if(name.length>14){
+                    name=String(name).substring(0,8)+"..."
+                }
+                info.name=name
                 info.path = arrays[x]
 
                 //var tags=id3.read(arrays[x])
