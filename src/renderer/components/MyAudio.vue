@@ -1,21 +1,21 @@
 <template>
   <div>
     <el-row :gutter="20">
-      <el-col :span="6">
-        <div class="grid-content bg-purple"></div>
+      <el-col :span="18">
+        <div class="grid-content bg-purple" id="progress">
+          <div style="width:80%">
+            <el-slider v-model="progress" :show-tooltip="false" style="margin-left:12px"></el-slider>
+          </div>
+          <div>{{current}}s/{{length}}s &nbsp;</div>
+        </div>
       </el-col>
       <el-col :span="6">
-        <div class="grid-content bg-purple"></div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
+        <el-button-group class="grid-content bg-purple">
+          <el-button></el-button>
           <el-button @click="startPlayOrPause"></el-button>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
+          <el-button></el-button>
           <el-button @click="setLocalRepo"></el-button>
-        </div>
+        </el-button-group>
       </el-col>
     </el-row>
   </div>
@@ -28,7 +28,10 @@ import {
   pauseMusic,
   getByteFrequencyData,
   getDefaultPlayer,
-  isOn
+  isOn,
+  dropContext,
+  getCurrent,
+  getLength
 } from "../utils/audioPlayer";
 import vue from "../utils/bus";
 import { mapGetters, mapActions, mapMutations } from "vuex";
@@ -38,25 +41,46 @@ export default {
   components: {},
   data() {
     return {
-      src: "F:/KuGou/流行音悦台 - 6人用阿卡贝拉串烧2018年欧美热曲!.mp3"
+      src: "",
+      current: 0,
+      progress: 0,
+      length:0,
+      timeFormat: "00:00"
     };
   },
-  beforeMount() {
-    setSource(this.src);
-  },
   mounted() {
-    vue.$on("playvideo", function(path) {
-      console.log(path);
+    var that=this
+    vue.$on("playvideo", function(data) {
+      var length=data.length
+      var path=data.path
       if (isOn()) {
-        pauseMusic()
-        this.isPlay = false
+        pauseMusic();
+        dropContext();
+        that.isPlay = false;
       }
-      getDefaultPlayer()
-      this.src = path
-      setSource(this.src)
-      playMusic()
-      vue.$emit("startpaint", [])
+      getDefaultPlayer();
+      that.src = path;
+      that.length=length
+      setSource(path, length);
+      playMusic();
+      vue.$emit("startpaint", []);
     });
+    
+    vue.$on("currentChange", function() {
+      that.current = getCurrent();
+      that.progress =100*that.current/getLength();
+    });
+  },
+
+  computed: {},
+  watch: {
+    current: {
+      handler(val,oldVal) {
+        //todo 格式化当前时间
+        
+      },
+      immediate: true
+    }
   },
 
   methods: {
@@ -65,14 +89,14 @@ export default {
       return isOn() ? this.pause() : this.play();
     },
     pause() {
-      pauseMusic()
+      pauseMusic();
       //触发canvas事件
-      this.stopDraw()
+      this.stopDraw();
     },
     play() {
-      playMusic()
+      playMusic();
       //触发canvas事件
-      this.startDraw()
+      this.startDraw();
     },
     startDraw() {
       vue.$emit("startpaint", []);
@@ -113,5 +137,11 @@ export default {
 .row-bg {
   padding: 10px 0;
   background-color: #f9fafc;
+}
+#progress {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
